@@ -1,6 +1,8 @@
 const fs = require('fs');
+const path = require('path')
 const express = require('express');
 const app = express();
+const port = process.env.PORT || 5000
 
 var gotcha = function(x10 = false) {
     var charOutput = Array(x10 ? 10 : 1).fill(null);
@@ -30,13 +32,8 @@ var gotcha = function(x10 = false) {
 }
 
 app.set('view engine', 'pug');
-app.use('/static', express.static(__dirname + '/public'));
+app.use('/static', express.static(path.join(__dirname, '/public')));
 
-app.get('/', function(req, res) {
-    res.render('index', {charList: gotcha(true)});
-});
+app.get('/', (req, res) => res.render('index', {charList: gotcha(true)}));
 
-app.listen(process.env.port || 80, function() {
-    var port = this.address().port;
-    console.log("Express is working on port " + port);
-});
+app.listen(port, () => console.log(`Listening on ${port}`));
