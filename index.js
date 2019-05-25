@@ -1,7 +1,6 @@
 const fs = require('fs');
 const express = require('express');
 const app = express();
-const port = process.env.port || 3000;
 
 var gotcha = function(x10 = false) {
     var charOutput = Array(x10 ? 10 : 1).fill(null);
@@ -37,5 +36,7 @@ app.get('/', function(req, res) {
     res.render('index', {charList: gotcha(true)});
 });
 
-app.listen(port);
-console.log('Listening on: http://localhost:' + port );
+app.listen(process.env.port || 5000, function() {
+    var port = this.address().port;
+    console.log("Express is working on port " + port);
+});
