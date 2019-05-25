@@ -36,7 +36,7 @@ app.get('/', function(req, res) {
     res.render('index', {charList: gotcha(true)});
 });
 
-app.listen(process.env.port || 5000, function() {
+app.listen(process.env.port || 80, function() {
     var port = this.address().port;
     console.log("Express is working on port " + port);
 });
