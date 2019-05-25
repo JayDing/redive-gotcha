@@ -1,0 +1,17 @@
+doctype html
+html
+    head
+        link(rel='stylesheet' href='/static/css/style.css')
+    body
+        div.bg
+            div.board
+                each char in charList
+                    case char.star
+                        when 1
+                            -var frameClass = 'blue'
+                        when 2
+                            -var frameClass = 'gold'
+                        when 3
+                            -var frameClass = 'rainbow'
+                    div.card(class=frameClass)
+                        img(src='/static/images/card/' + char.name + '.png')

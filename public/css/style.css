@@ -1,0 +1,47 @@
+div.bg {
+    background: url('/static/images/bg.jpg') no-repeat;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 455px;
+    width: 890px;
+}
+div.board {
+    align-items: center;
+    background: rgba(255, 255, 255, 0.5);
+    border-radius: 20px;
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr 1fr 1fr;
+    height: 300px;
+    justify-items: center;
+    width: 680px;
+}
+div.card {
+    align-items: center;
+    border-radius: 10px;
+    box-shadow: 0px 5px 5px 2px rgba(0, 0, 0, 0.5);
+    display: flex;
+    height: 100px;
+    justify-content: center;
+    width: 100px;
+}
+
+div.card.blue {
+    background: skyblue;
+}
+
+div.card.gold {
+    background: gold;
+}
+
+div.card.rainbow {
+    background: linear-gradient(to bottom right, orange , yellow, green, cyan, blue, violet);
+    box-shadow: 
+        0px 5px 5px 2px rgba(0, 0, 0, 0.5),
+        0px 0px 5px 2px rgba(255, 255, 255, 0.7) inset;
+}
+
+div.card > img {
+    height: 90px;
+    width: 90px;
+}
