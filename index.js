@@ -45,11 +45,40 @@ app.get('/toImg', (req, res) => {
 app.post('/linewebhook', bot.parser());
 
 bot.on('message', function (event) {
-    event.reply(event.message.text).then(function (data) {
-        console.log('Success:', data);
-    }).catch(function (err) {
-        console.log('Error:', err);
-    });
+    switch(event.message.type) {
+        case 'text':
+            switch (event.message.text) {
+                case '!抽':
+                    event.reply({
+                            type: 'image',
+                            originalContentUrl: 'https://redive-gotcha.herokuapp.com/toImg',
+                            previewImageUrl: 'https://redive-gotcha.herokuapp.com/toImg'
+                        })
+                        .then(function (data) {
+                            console.log('Success:', data);
+                        })
+                        .catch(function (err) {
+                            console.log('Error:', err);
+                        });
+                    break;
+                default:
+                    event.reply(event.message.text)
+                        .then(function (data) {
+                            console.log('Success', data);
+                        }).catch(function (err) {
+                            console.log('Error', err);
+                        });
+                    break;
+            }
+        default:
+            event.reply('看不懂啦!!')
+                .then(function (data) {
+                    console.log('Success:', data);
+                }).catch(function (err) {
+                    console.log('Error:', err);
+                });
+            break;
+    }
 });
 
 app.listen(port, () => console.log(`Listening on port: ${port}`));
