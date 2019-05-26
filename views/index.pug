@@ -8,9 +8,10 @@ html
         meta(property='og:description' content='抽抽抽抽抽抽!!!')
         meta(property='og:image' content='/static/images/sticker.png')
         meta(property='og:site_name' content='Re:Dive Gotcha')
+        meta(property='og:url' content='https://redive-gotcha.herokuapp.com/')
     body
-        div.bg
-            div.board
+        #main
+            .board
                 each char in charList
                     case char.star
                         when 1
@@ -19,5 +20,7 @@ html
                             -var frameClass = 'gold'
                         when 3
                             -var frameClass = 'rainbow'
-                    div.card(class=frameClass)
+                    .card(class=frameClass)
                         img(src='/static/images/card/' + char.name + '.png')
+                else
+                    .no-list #[strong 壞惹]

@@ -1,39 +1,34 @@
-const fs = require('fs');
-const path = require('path')
+const path = require('path');
 const express = require('express');
+const libs = require('./libs');
+const puppeteer = require('puppeteer');
+
 const app = express();
-const port = process.env.PORT || 5000
-
-var gotcha = function(x10 = false) {
-    var charOutput = Array(x10 ? 10 : 1).fill(null);
-    
-    var getChar = function(isLast = false) {
-        var charList = JSON.parse(fs.readFileSync('charcter.json'));
-        var poolRate = Math.floor(Math.random() * 100) + 1;
-
-        charList = charList.filter((c) => c.inPool === true);
-        
-        if(poolRate <= 2) {
-            listFiltered = charList.filter((c) => c.star === 3);
-            listFiltered.push(...charList.filter((c) => c.star === 3 && c.rateUp === 2));
-            console.log(listFiltered);
-        } else if(poolRate > 2 && poolRate <= (!isLast ? 20 : 100)) {
-            listFiltered = charList.filter((c) => c.star === 2);
-        } else {
-            listFiltered = charList.filter((c) => c.star === 1);
-        }
-
-        return listFiltered[Math.floor(Math.random() * listFiltered.length)];
-    }
-
-    charOutput = charOutput.map((e, i, arr) => getChar(arr.length - 1 === i));
-    
-    return charOutput;
-}
+const port = process.env.PORT || 3000
 
 app.set('view engine', 'pug');
 app.use('/static', express.static(path.join(__dirname, '/public')));
 
-app.get('/', (req, res) => res.render('index', {charList: gotcha(true)}));
+app.get('/', (req, res) => res.render('index', {charList: libs.gotcha(true)}));
+app.get('/toimg', (req, res) => {
+    const browser = puppeteer.launch();
 
-app.listen(port, () => console.log(`Listening on ${port}`));
+    browser
+        .then(async browser => {
+            const page = await browser.newPage();
+            await page.goto('http://localhost:3000/');
+            console.log(page);
+            await page.waitForSelector('#main')
+            await page.setViewport({
+                width: 890,
+                height: 455
+            });
+            await page.screenshot({path: './public/images/result.png'});
+            await browser.close();
+            
+            res.sendFile(path.join(__dirname, '/public/images/result.png'));
+        })
+        .catch((err) => console.log(err));
+});
+
+app.listen(port, () => console.log(`Listening on port: ${port}`));

@@ -1,4 +1,10 @@
-div.bg {
+body {
+    font-family: 'Microsoft JhengHei', Arial, Helvetica, sans-serif;
+    margin: 0;
+    padding: 0;
+}
+
+div#main {
     background: url('/static/images/bg.jpg') no-repeat;
     display: flex;
     align-items: center;
@@ -44,4 +50,14 @@ div.card.rainbow {
 div.card > img {
     height: 90px;
     width: 90px;
+}
+
+div.no-list {
+    align-items: center;
+    display: flex;
+    font-size: 60px;
+    grid-column: 1 / 6;
+    height: 100px;
+    justify-content: center;
+    width: 600px;
 }
