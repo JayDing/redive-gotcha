@@ -2,13 +2,6 @@ const path = require('path');
 const express = require('express');
 const libs = require('./libs');
 const puppeteer = require('puppeteer');
-const lineBot = require('linebot');
-
-const bot = lineBot({
-    channelId: process.env.CHANNEL_ID,
-    channelSecret: process.env.CHANNEL_SECRET,
-    channelAccessToken: process.env.CHANNEL_ACCESS_TOKEN
-});
 
 const app = express();
 const port = process.env.PORT || 3000
@@ -29,7 +22,6 @@ app.get('/toImg', (req, res) => {
         .then(async browser => {
             const page = await browser.newPage();
             await page.goto('https://redive-gotcha.herokuapp.com/');
-            console.log(page);
             await page.waitForSelector('#main')
             await page.setViewport({
                 width: 890,
@@ -40,16 +32,7 @@ app.get('/toImg', (req, res) => {
             
             res.sendFile(path.join(__dirname, '/public/images/result.png'));
         })
-        .catch((err) => console.log(err));
-});
-app.post('/linewebhook', bot.parser());
-
-bot.on('message', function (event) {
-    event.reply(event.message.text).then(function (data) {
-        console.log('Success:', data);
-    }).catch(function (err) {
-        console.log('Error:', err);
-    });
+        .catch((err) => console.error(err));
 });
 
 app.listen(port, () => console.log(`Listening on port: ${port}`));
