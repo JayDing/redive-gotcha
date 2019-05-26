@@ -21,16 +21,19 @@ app.get('/toImg', (req, res) => {
     browser
         .then(async browser => {
             const page = await browser.newPage();
-            await page.goto('https://redive-gotcha.herokuapp.com/');
+            await page.goto('http://localhost:3000/');
             await page.waitForSelector('#main')
             await page.setViewport({
                 width: 890,
                 height: 455
             });
-            await page.screenshot({path: './public/images/result.png'});
+            await page.screenshot({
+                path: './public/images/result.jpg',
+                type: 'jpeg'
+            });
             await browser.close();
             
-            res.sendFile(path.join(__dirname, '/public/images/result.png'));
+            res.sendFile(path.join(__dirname, '/public/images/result.jpg'));
         })
         .catch((err) => console.error(err));
 });
