@@ -21,7 +21,7 @@ app.get('/toImg', (req, res) => {
     browser
         .then(async browser => {
             const page = await browser.newPage();
-            await page.goto('http://localhost:3000/');
+            await page.goto('https://redive-gotcha.herokuapp.com/');
             console.log(page);
             await page.waitForSelector('#main')
             await page.setViewport({
