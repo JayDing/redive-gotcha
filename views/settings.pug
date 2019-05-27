@@ -1,7 +1,7 @@
 doctype html
 html
     head
-        title Re:Dive Gotcha - ${ page }
+        title Re:Dive Gotcha - !{ page }
         link(rel="shortcut icon", href="/static/images/sticker.png", type="image/png")
         link(rel="stylesheet" href=`/static/css/${page}.css`)
     body
@@ -20,7 +20,7 @@ html
                             
                     .card
                         .frame(class=frameClass)
-                            img(src="/static/images/card/" + char.name + ".png")
+                            img(src=`/static/images/card/${char.name}.png`)
                         .name
                             strong !{ char.name.replace("（", "<br/>（") }
                         .footer
