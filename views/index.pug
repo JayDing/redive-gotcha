@@ -1,26 +1,21 @@
 doctype html
 html
     head
-        title Re:Dive Gotcha
-        link(rel='stylesheet' href='/static/css/style.css')
-        meta(property='og:type' content='website')
-        meta(property='og:title' content='Re:Dive Gotcha')
-        meta(property='og:description' content='抽抽抽抽抽抽!!!')
-        meta(property='og:image' content='/static/images/sticker.png')
-        meta(property='og:site_name' content='Re:Dive Gotcha')
-        meta(property='og:url' content='https://redive-gotcha.herokuapp.com/')
+        title Re:Dive Gotcha - ${ page }
+        link(rel="shortcut icon", href="/static/images/sticker.png", type="image/png")
+        link(rel="stylesheet" href=`/static/css/${page}.css`)
     body
         #main
             .board
                 each char in charList
                     case char.star
                         when 1
-                            -var frameClass = 'blue'
+                            -var frameClass = "blue"
                         when 2
-                            -var frameClass = 'gold'
+                            -var frameClass = "gold"
                         when 3
-                            -var frameClass = 'rainbow'
+                            -var frameClass = "rainbow"
                     .card(class=frameClass)
-                        img(src='/static/images/card/' + char.name + '.png')
+                        img(src="/static/images/card/" + char.name + ".png")
                 else
                     .no-list #[strong 壞惹]

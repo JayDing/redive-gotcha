@@ -1,0 +1,38 @@
+doctype html
+html
+    head
+        title Re:Dive Gotcha - ${ page }
+        link(rel="shortcut icon", href="/static/images/sticker.png", type="image/png")
+        link(rel="stylesheet" href=`/static/css/${page}.css`)
+    body
+        #main
+            form#board(action="/settings" method="POST")
+                each char, i in charList
+                    -var showRateUp = false
+                    case char.star
+                        when 1
+                            -var frameClass = "blue"
+                        when 2
+                            -var frameClass = "gold"
+                        when 3
+                            -var frameClass = "rainbow"
+                            -var showRateUp = true
+                            
+                    .card
+                        .frame(class=frameClass)
+                            img(src="/static/images/card/" + char.name + ".png")
+                        .name
+                            strong !{ char.name.replace("（", "<br/>（") }
+                        .footer
+                            | 機率 !{ char.prob } %
+                            br
+                            label
+                                input(type="checkbox" name=`inPool[${char.name}]` checked=char.inPool)
+                                | 卡池啟用
+                            br
+                            if showRateUp
+                                label
+                                    input(type="checkbox" name=`rateUp[${char.name}]` checked=char.rateUp)
+                                    | 機率提升
+                input.update(type="submit", value="更新")
+            

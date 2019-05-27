@@ -1,6 +1,7 @@
 const express = require('express');
-const path = require('path');
 const libs = require('./libs');
+const path = require('path');
+const bodyparser = require('body-parser');
 const puppeteer = require('puppeteer');
 
 const app = express();
@@ -8,10 +9,21 @@ const port = process.env.PORT || 3000
 const bot = libs.bot();
 
 app.set('view engine', 'pug');
+app.use(bodyparser.json());
+app.use(bodyparser.urlencoded({ extended: true }));
 app.use('/static', express.static(path.join(__dirname, '/public')));
 
 app.get('/', (req, res) => {
-    res.render('index', {charList: libs.gotcha(true)});
+    res.render('index', { page: 'index', charList: libs.gotcha(true) });
+});
+
+app.get('/settings', (req, res) => {
+    res.render('settings', { page: 'settings', charList: libs.getCharList() });
+});
+
+app.post('/settings', (req, res) => {
+    libs.updateCharList(req.body);
+    res.redirect(301, '/settings');
 });
 
 app.get('/toImg', (req, res) => {

@@ -1,0 +1,93 @@
+body {
+    font-family: 'Microsoft JhengHei', Arial, Helvetica, sans-serif;
+    margin: 0;
+    padding: 0;
+}
+
+div#main {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: auto;
+    position: relative;
+    width: 100%;
+}
+div#main::before {
+    bottom: 0;
+    content: '';
+    background: url('/static/images/sticker.png') 25% 25%;
+    height: 100%;
+    left: 0;
+    min-height: 100%;
+    opacity: 0.1;
+    position: absolute;
+    right: 0;
+    top: 0;
+    z-index: -1;
+}
+
+form#board {
+    align-items: center;
+    border-radius: 20px;
+    display: flex;
+    height: auto;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    padding-top: 80px;
+    width: 1200px;
+}
+
+div.card {
+    align-items: center;
+    display: flex;
+    flex-direction: column;
+    height: 250px;
+    text-align: center;
+    width: 150px;
+}
+
+div.frame {
+    align-items: center;
+    border-radius: 10px;
+    box-shadow: 0px 3px 3px 1px rgba(0, 0, 0, 0.5);
+    display: flex;
+    height: 100px;
+    justify-content: center;
+    width: 100px;
+}
+
+div.frame.blue {
+    background: skyblue;
+}
+
+div.frame.gold {
+    background: gold;
+}
+
+div.frame.rainbow {
+    background: linear-gradient(to bottom right, orange , yellow, green, cyan, blue, violet);
+    box-shadow: 
+        0px 3px 3px 1px rgba(0, 0, 0, 0.5),
+        0px 0px 5px 5px rgba(255, 255, 255, 0.7) inset;
+}
+
+div.frame > img {
+    height: 90px;
+    width: 90px;
+}
+
+div.name {
+    display: flex;
+    height: 45px;
+    align-items: center;
+    margin: 5px 0;
+}
+
+input.update {
+    font-size: 20px;
+    height: 35px;
+    right: 20px;
+    position: fixed;
+    top: 20px;
+    width: 80px;
+}
