@@ -3,12 +3,12 @@ const sharp = require('sharp');
 const lineBot = require('linebot');
 const request = require('request');
 
-var gotcha = function(x10 = false) {
-    var charOutput = Array(x10 ? 10 : 1).fill(null);
+let gotcha = function(x10 = false) {
+    let charOutput = Array(x10 ? 10 : 1).fill(null);
     
-    var getChar = function(isLast = false) {
-        var charList = JSON.parse(fs.readFileSync('charcter.json'));
-        var poolRate = Math.floor(Math.random() * 100) + 1;
+    let getChar = function(isLast = false) {
+        let charList = JSON.parse(fs.readFileSync('charcter.json'));
+        let poolRate = Math.floor(Math.random() * 100) + 1;
 
         charList = charList.filter((c) => c.inPool === true);
         
@@ -29,14 +29,14 @@ var gotcha = function(x10 = false) {
     return charOutput;
 }
 
-var resize = function(inFile, outFile, width, height) {
-    const inStream = fs.createReadStream(inFile);
-    const outStream = fs.createWriteStream(outFile, { flags: 'w' });
+let resize = function(file, width, height) {
+    const inStream = fs.createReadStream(file);
+    const outStream = fs.createWriteStream(file.replace('result_', 'thumb_'), { flags: 'w' });
     
     inStream.pipe(sharp().resize(width, height)).pipe(outStream);
 }
 
-var bot = function() {
+let bot = function() {
     const bot = lineBot({
         channelId: process.env.CHANNEL_ID,
         channelSecret: process.env.CHANNEL_SECRET,
@@ -49,11 +49,11 @@ var bot = function() {
                 switch (event.message.text) {
                     case '!抽':
                         request('https://redive-gotcha.herokuapp.com/toImg', (err, res, body) => {
-                            if(!err && res.body == 'success') {
+                            if(!err && res.statusCode == 200) {
                                 event.reply({
                                     type: 'image',
-                                    originalContentUrl: 'https://redive-gotcha.herokuapp.com/toImg/result',
-                                    previewImageUrl: 'https://redive-gotcha.herokuapp.com/toImg/thumb'
+                                    originalContentUrl: `https://redive-gotcha.herokuapp.com/toImg/result_${body}.jpg`,
+                                    previewImageUrl: `https://redive-gotcha.herokuapp.com/toImg/thumb_${body}.jpg`
                                 })
                                 .then(function (data) {
                                     console.log('Success:', data);

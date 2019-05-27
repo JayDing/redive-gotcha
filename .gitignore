@@ -1,5 +1,5 @@
 node_modules/
-public/images/result.jpg
-public/images/thumb.jpg
+public/images/result_*.jpg
+public/images/thumb_*.jpg
 .env
 test.js

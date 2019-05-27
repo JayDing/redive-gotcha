@@ -5,8 +5,6 @@ const puppeteer = require('puppeteer');
 
 const app = express();
 const port = process.env.PORT || 3000
-const resultPath = path.join(__dirname, '/public/images/result.jpg');
-const thumbPath = path.join(__dirname, '/public/images/thumb.jpg');
 const bot = libs.bot();
 
 app.set('view engine', 'pug');
@@ -16,7 +14,11 @@ app.get('/', (req, res) => {
     res.render('index', {charList: libs.gotcha(true)});
 });
 
-app.get('/toImg', (req, res, next) => {
+app.get('/toImg', (req, res) => {
+    let timestamp = new Date().toISOString().split(/\./)[0].replace(/[-:T]/g, '');
+    let imageName = `result_${timestamp}.jpg`;
+    let imagePath = path.join(__dirname, '/public/images/', imageName);
+    
     const browser = puppeteer.launch({
         'args' : [
             '--no-sandbox',
@@ -35,22 +37,20 @@ app.get('/toImg', (req, res, next) => {
                 height: 455
             });
             await page.screenshot({
-                path: resultPath,
+                path: imagePath,
                 type: 'jpeg'
             })            
             await browser.close();
 
-            next();
+            libs.resize(imagePath, 240, 123);
+            res.status(200).send(timestamp);
         })
         .catch((err) => console.error(err));
-}, (req, res, next) => {
-    libs.resize(resultPath, thumbPath, 240, 123);
-    res.status(200).send('success');
 });
 
-app.get('/toImg/:type', (req, res) => {
-    const type = req.params.type;
-    res.sendFile(path.join(__dirname, '/public/images/' + type + '.jpg'))
+app.get('/toImg/:file', (req, res) => {
+    const file = req.params.file;
+    res.sendFile(path.join(__dirname, '/public/images/', file));
 });
 
 app.post('/linewebhook', bot.parser());
