@@ -1,4 +1,7 @@
 const fs = require('fs');
+const sharp = require('sharp');
+const lineBot = require('linebot');
+const request = require('request');
 
 var gotcha = function(x10 = false) {
     var charOutput = Array(x10 ? 10 : 1).fill(null);
@@ -26,4 +29,52 @@ var gotcha = function(x10 = false) {
     return charOutput;
 }
 
-module.exports = { gotcha };
+var resize = function(inFile, outFile, width, height) {
+    const inStream = fs.createReadStream(inFile);
+    const outStream = fs.createWriteStream(outFile, { flags: 'w' });
+    
+    inStream.pipe(sharp().resize(width, height)).pipe(outStream);
+}
+
+var bot = function() {
+    const bot = lineBot({
+        channelId: process.env.CHANNEL_ID,
+        channelSecret: process.env.CHANNEL_SECRET,
+        channelAccessToken: process.env.CHANNEL_ACCESS_TOKEN
+    });
+
+    bot.on('message', function (event) {
+        switch(event.message.type) {
+            case 'text':
+                switch (event.message.text) {
+                    case '!抽':
+                        request('https://redive-gotcha.herokuapp.com/toImg', (err, res, body) => {
+                            if(!err && res.body == 'success') {
+                                event.reply({
+                                    type: 'image',
+                                    originalContentUrl: 'https://redive-gotcha.herokuapp.com/toImg/result',
+                                    previewImageUrl: 'https://redive-gotcha.herokuapp.com/toImg/thumb'
+                                })
+                                .then(function (data) {
+                                    console.log('Success:', data);
+                                })
+                                .catch(function (err) {
+                                    console.error('Error:', err);
+                                });
+                            } else {
+                                console.error('Oops! Something wrong!')
+                            }
+                        });
+                        break;
+                    default:
+                        break;
+                }
+            default:
+                break;
+        }
+    });
+
+    return bot;
+}
+
+module.exports = { gotcha, resize, bot };
