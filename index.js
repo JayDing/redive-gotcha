@@ -9,8 +9,6 @@ const port = process.env.PORT || 3000
 const bot = libs.bot();
 
 app.set('view engine', 'pug');
-app.use(bodyparser.json());
-app.use(bodyparser.urlencoded({ extended: true }));
 app.use('/static', express.static(path.join(__dirname, '/public')));
 
 app.get('/', (req, res) => {
@@ -21,7 +19,7 @@ app.get('/settings', (req, res) => {
     res.render('settings', { page: 'settings', charList: libs.getCharList() });
 });
 
-app.post('/settings', (req, res) => {
+app.post('/settings', bodyparser.urlencoded({ extended: true }), (req, res) => {
     libs.updateCharList(req.body);
     res.redirect(301, '/settings');
 });
@@ -43,7 +41,7 @@ app.get('/toImg', (req, res) => {
             const page = await browser.newPage();
 
             await page.goto('https://redive-gotcha.herokuapp.com/');
-            await page.waitForSelector('#main')
+            await page.waitForSelector('#main');
             await page.setViewport({
                 width: 890,
                 height: 455
