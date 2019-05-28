@@ -1,0 +1,36 @@
+{
+  "addons": [
+
+  ],
+  "buildpacks": [
+    {
+      "url": "https://github.com/jontewks/puppeteer-heroku-buildpack.git"
+    },
+    {
+      "url": "https://github.com/CoffeeAndCode/puppeteer-heroku-buildpack.git"
+    },
+    {
+      "url": "heroku/nodejs"
+    }
+  ],
+  "env": {
+    "CHANNEL_ACCESS_TOKEN": {
+      "required": true
+    },
+    "CHANNEL_ID": {
+      "required": true
+    },
+    "CHANNEL_SECRET": {
+      "required": true
+    }
+  },
+  "formation": {
+    "web": {
+      "quantity": 1
+    }
+  },
+  "name": "redive-gotcha",
+  "scripts": {
+  },
+  "stack": "heroku-18"
+}
