@@ -40,18 +40,16 @@ let getCharList = function() {
 
 let probCalc = function(charList, char) {
     let cPool = charList.filter((c) => c.inPool === true && c.star === char.star);
-    
-    if(cPool.indexOf(char) == -1) return 0;
+
+    if(cPool.indexOf(char) == -1) return { normal: 0, last: 0 };
 
     let cUp = cPool.filter((c) => c.rateUp === true);
-    let base = 0
-    switch(char.star) {
-        case 1: base = 80; break;
-        case 2: base = 18; break;
-        case 3: base = 2; break;
-    }
+    let base = { 1: [80, 0], 2: [18, 98], 3: [2, 2] }; // star : [ normal, last ]
     
-    return Math.round( (base * (char.rateUp ? char.rate : 1)) / (cPool.length + cUp.length * (char.rate - 1)) * 100 ) / 100;
+    return {
+        normal : Math.round( base[char.star][0] * ( (char.rateUp ? char.rate : 1)) / (cPool.length + cUp.length * (char.rate - 1) ) * 100 ) / 100,
+        last : Math.round( base[char.star][1] * ( (char.rateUp ? char.rate : 1) / (cPool.length + cUp.length * (char.rate - 1)) ) * 100 ) / 100
+    };
 }
 
 let updateCharList = function(data) {

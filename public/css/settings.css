@@ -76,6 +76,10 @@ div.frame > img {
     width: 90px;
 }
 
+div.frame.grayscale {
+    filter: grayscale(100%);
+}
+
 div.name {
     display: flex;
     height: 45px;
