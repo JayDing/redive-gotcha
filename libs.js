@@ -43,12 +43,16 @@ let probCalc = function(charList, char) {
 
     if(cPool.indexOf(char) == -1) return { normal: 0, last: 0 };
 
-    let cUp = cPool.filter((c) => c.rateUp === true);
-    let base = { 1: [80, 0], 2: [18, 98], 3: [2, 2] }; // star : [ normal, last ]
+    if(char.rateUp) return { normal: char.rate, last: char.rate };
     
+    // star : [ normal, last ]
+    let base = { 1: [80, 0], 2: [18, 98], 3: [2, 2] };
+    let cUpPool = cPool.filter((c) => c.rateUp === true);
+    let cUp = cUpPool.reduce((init, char) => init + char.rate , 0);
+
     return {
-        normal : Math.round( base[char.star][0] * ( (char.rateUp ? char.rate : 1)) / (cPool.length + cUp.length * (char.rate - 1) ) * 100 ) / 100,
-        last : Math.round( base[char.star][1] * ( (char.rateUp ? char.rate : 1) / (cPool.length + cUp.length * (char.rate - 1)) ) * 100 ) / 100
+        normal: Math.round((base[char.star][0] - cUp) / (cPool.length - cUpPool.length) * 10000 ) / 10000,
+        last: Math.round((base[char.star][1] - cUp) / (cPool.length - cUpPool.length) * 10000 ) / 10000
     };
 }
 
@@ -58,17 +62,23 @@ let updateCharList = function(data) {
 
     charList.map((char) => {
         char.inPool = data.inPool && Object.keys(data.inPool).indexOf(char.name) != -1;
-        char.rateUp = data.rateUp && Object.keys(data.rateUp).indexOf(char.name) != -1 && char.inPool;
-        
+        char.rateUp = char.inPool && data.rateUp && Object.keys(data.rateUp).indexOf(char.name) != -1;
+        if(char.rateUp && data.rate && Object.keys(data.rateUp).indexOf(char.name) != -1 && !Number.isNaN(data.rate[char.name])) {
+            char.rateUp = data.rate[char.name] > 0;
+            char.rate = (data.rate[char.name] > 0) ? Number(data.rate[char.name]) : 0;
+        }
+
         return char;
-    })
-    
+    });
+
     output = JSON.stringify(charList);
     
-    fs.writeFile('character.json', output, (err) => {
-        if (err) console.error(err);
+    try {
+        fs.writeFileSync('character.json', output);
         console.log('character.json is updated');
-    });
+    } catch(err) {
+        console.error('character.json updated Error: ' + err);
+    }
 }
 
 let resize = function(file, width, height) {

@@ -10,6 +10,7 @@ div#main {
     justify-content: center;
     height: auto;
     position: relative;
+    text-align: center;
     width: 100%;
 }
 div#main::before {
@@ -31,67 +32,89 @@ form#board {
     border-radius: 20px;
     display: flex;
     height: auto;
-    justify-content: space-between;
     flex-wrap: wrap;
+    justify-content: center;
     padding-top: 80px;
     width: 1200px;
 }
 
-div.card {
+div.char {
     align-items: center;
     display: flex;
     flex-direction: column;
-    height: 250px;
-    text-align: center;
-    width: 150px;
+    height: 300px;
+    justify-content: flex-start;
+    width: 180px;
 }
 
-div.frame {
+div.char > div.frame {
     align-items: center;
     border-radius: 10px;
-    box-shadow: 0px 3px 3px 1px rgba(0, 0, 0, 0.5);
+    box-shadow: 
+        3px 3px 5px 1px rgba(0, 0, 0, 0.5),
+        0px 0px 5px 3px rgba(255, 255, 255, 0.7) inset;
     display: flex;
-    height: 100px;
+    height: 120px;
     justify-content: center;
-    width: 100px;
+    margin: 5px 0;
+    width: 120px;
 }
 
-div.frame.blue {
+div.char > div.frame.blue {
     background: skyblue;
 }
 
-div.frame.gold {
+div.char > div.frame.gold {
     background: gold;
+    
 }
 
-div.frame.rainbow {
+div.char > div.frame.rainbow {
     background: linear-gradient(to bottom right, orange , yellow, green, cyan, blue, violet);
-    box-shadow: 
-        0px 3px 3px 1px rgba(0, 0, 0, 0.5),
-        0px 0px 5px 5px rgba(255, 255, 255, 0.7) inset;
 }
 
-div.frame > img {
-    height: 90px;
-    width: 90px;
-}
-
-div.frame.grayscale {
+div.char > div.frame.grayscale {
     filter: grayscale(100%);
 }
 
-div.name {
-    display: flex;
-    height: 45px;
-    align-items: center;
-    margin: 5px 0;
+div.char > div.frame > img {
+    height: 104px;
+    width: 104px;
 }
 
-input.update {
+div.char > div.name,
+div.char > div.info,
+div.char > div.footer {
+    align-items: center;
+    display: flex;
+    flex-direction: column;
+    height: 60px;
+    justify-content: center;
+}
+
+div.char > div.footer {
+    align-items: flex-start;
+}
+
+div.char > div.footer label.rate > input[type=text] {
+    height: 12px;
+    text-align: center;
+    width: 40px;
+}
+
+input.update,
+input.reset {
     font-size: 20px;
     height: 35px;
-    right: 20px;
     position: fixed;
-    top: 20px;
     width: 80px;
+}
+input.update {
+    right: 20px;
+    top: 20px;
+}
+
+input.reset {
+    right: 20px;
+    top: 60px;
 }

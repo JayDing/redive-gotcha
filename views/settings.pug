@@ -10,27 +10,30 @@ html
                 each char, i in charList
                     -var frameClass = { 1: "blue", 2: "gold", 3:"rainbow" }
                     -var imgGrayScale = char.inPool ? "" : "grayscale"
-                    -var showRateUp = char.star === 3
                             
-                    .card
+                    .char
                         .frame(class=frameClass[char.star] class=imgGrayScale)
                             img(src=`/static/images/card/${char.name}.png`)
                         .name
                             strong !{ char.name.replace("（", "<br/>（") }
+                            input.key(type="hidden" value=char.name)
+                        .info
+                            span 機率 !{ char.prob.normal } %
+                            span (第10抽 !{ char.prob.last} %)
                         .footer
-                            | 機率 !{ char.prob.normal } %
-                            br
-                            | (第10抽 !{ char.prob.last} %)
-                            br
-                            label
-                                input.in-pool(type="checkbox" name=`inPool[${char.name}]` checked=char.inPool)
+                            label.in-pool
+                                input(type="checkbox" name=`inPool[${char.name}]` checked=char.inPool)
                                 | 卡池啟用
-                            br
-                            if showRateUp
-                                label
-                                    input.rate-up(type="checkbox" name=`rateUp[${char.name}]` checked=char.rateUp)
-                                    | 機率提升
+                            label.rate-up
+                                input(type="checkbox" name=`rateUp[${char.name}]` checked=char.rateUp)
+                                | 機率提升
+                                if char.rateUp
+                                    label.rate
+                                        input(type="text" name=`rate[${char.name}]` value=char.rate)
+                                        | %
                 input.update(type="submit", value="更新")
+                input.reset(type="button" value="重設")
 
         script(src=`/static/js/${page}.js`)
+
         
