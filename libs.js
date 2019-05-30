@@ -3,10 +3,10 @@ const sharp = require('sharp');
 const lineBot = require('linebot');
 const request = require('request');
 
-let gotcha = function(x10 = false) {
+let gotcha = (x10 = false) => {
     let charOutput = Array(x10 ? 10 : 1).fill(null);
     
-    let getChar = function(isLast = false) {
+    let getChar = (isLast = false) => {
         let charList = JSON.parse(fs.readFileSync('character.json'));
         let poolRate = Math.floor(Math.random() * 100) + 1;
 
@@ -29,7 +29,7 @@ let gotcha = function(x10 = false) {
     return charOutput;
 }
 
-let getCharList = function() {
+let getCharList = () => {
     let charList = JSON.parse(fs.readFileSync('character.json'));
     charList.map((char, i, charList) => {
         char.prob = probCalc(charList, char);
@@ -38,7 +38,7 @@ let getCharList = function() {
     return charList.sort((a, b) => b.star - a.star);
 }
 
-let probCalc = function(charList, char) {
+let probCalc = (charList, char) => {
     let cPool = charList.filter((c) => c.inPool === true && c.star === char.star);
 
     if(cPool.indexOf(char) == -1) return { normal: 0, last: 0 };
@@ -56,7 +56,7 @@ let probCalc = function(charList, char) {
     };
 }
 
-let updateCharList = function(data) {
+let updateCharList = (data) => {
     let charList = JSON.parse(fs.readFileSync('character.json'));
     let output;
 
@@ -81,37 +81,38 @@ let updateCharList = function(data) {
     }
 }
 
-let resize = function(file, width, height) {
+let resize = (file, width, height) => {
     const inStream = fs.createReadStream(file);
     const outStream = fs.createWriteStream(file.replace('result_', 'thumb_'), { flags: 'w' });
     
     inStream.pipe(sharp().resize(width, height)).pipe(outStream);
 }
 
-let bot = function() {
+let bot = () => {
+    const port = process.env.PORT || 3000
     const bot = lineBot({
         channelId: process.env.CHANNEL_ID,
         channelSecret: process.env.CHANNEL_SECRET,
         channelAccessToken: process.env.CHANNEL_ACCESS_TOKEN
     });
 
-    bot.on('message', function (event) {
+    bot.on('message', (event) => {
         switch(event.message.type) {
             case 'text':
                 switch (event.message.text) {
                     case '!抽':
-                        request('https://redive-gotcha.herokuapp.com/toImg', (err, res, body) => {
+                        request(`http://localhost:${port}/toImg`, (err, res, body) => {
                             if(!err && res.statusCode == 200) {
                                 event.reply({
                                     type: 'image',
                                     originalContentUrl: `https://redive-gotcha.herokuapp.com/toImg/result_${body}.jpg`,
                                     previewImageUrl: `https://redive-gotcha.herokuapp.com/toImg/thumb_${body}.jpg`
                                 })
-                                .then(function (data) {
-                                    console.log('Success:', data);
+                                .then(() => {
+                                    console.log(`Reply "${event.message.text}" successfully`);
                                 })
-                                .catch(function (err) {
-                                    console.error('Error:', err);
+                                .catch((err) => {
+                                    console.error('Error: ' + err);
                                 });
                             } else {
                                 console.error('Oops! Something wrong!')
@@ -129,8 +130,8 @@ let bot = function() {
     return bot;
 }
 
-let cron = function(ms, fn) {
-    let cb = function() {
+let cron = (ms, fn) => {
+    let cb = () => {
         clearTimeout(timeout);
         timeout = setTimeout(cb, ms);
         fn();

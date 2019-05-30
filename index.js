@@ -40,7 +40,7 @@ app.get('/toImg', (req, res) => {
         .then(async browser => {
             const page = await browser.newPage();
 
-            await page.goto('https://redive-gotcha.herokuapp.com/');
+            await page.goto(`http://localhost:${port}/`);
             await page.waitForSelector('#main');
             await page.setViewport({
                 width: 890,
