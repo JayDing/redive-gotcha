@@ -123,17 +123,12 @@ let bot = () => {
                         break;
                     case '!wake'.toLowerCase():
                     case '!醒醒':
-                        event.reply([
-                            {
-                                tpye: 'text',
-                                text: emoji.emojify('真步步才沒有睡著呢! :tired_face:', emojiOnMissing)
-                            },
-                            {
-                                type: 'sticker',
-                                packageId: '11537',
-                                stickerId: '51626509'
-                            }
-                        ]);
+                        event.reply(emoji.emojify('真步步才沒有睡著呢! :tired_face:', emojiOnMissing));
+                        event.reply({
+                            type: 'sticker',
+                            packageId: '11537',
+                            stickerId: '51626509'
+                        });
                         break
                     default:
                         break;

@@ -27,10 +27,10 @@ html
                             label.rate-up
                                 input(type="checkbox" name=`rateUp[${char.name}]` checked=char.rateUp)
                                 | 機率提升
-                                if char.rateUp
-                                    label.rate
-                                        input(type="text" name=`rate[${char.name}]` value=char.rate)
-                                        | %
+                            if char.rateUp
+                                label.rate
+                                    input(type="text" name=`rate[${char.name}]` value=char.rate)
+                                    | %
                 input.update(type="submit", value="更新")
                 input.reset(type="button" value="重設")
 

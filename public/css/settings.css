@@ -7,6 +7,7 @@ body {
 div#main {
     display: flex;
     align-items: center;
+    height: 100%;
     justify-content: center;
     position: relative;
     text-align: center;
@@ -29,7 +30,8 @@ div#main::before {
 form#board {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-    padding-top: 80px;
+    height: 100%;
+    padding: 80px 0;
     width: 90%;
 }
 
@@ -83,12 +85,13 @@ div.char > div.footer {
     align-items: center;
     display: flex;
     flex-direction: column;
-    height: 60px;
+    height: 50px;
     justify-content: center;
 }
 
 div.char > div.footer {
-    align-items: flex-start;
+    align-items: flex-end;
+    height: 80px;
 }
 
 div.char > div.footer label.rate > input[type=text] {
