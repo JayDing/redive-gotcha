@@ -2,6 +2,9 @@ const fs = require('fs');
 const sharp = require('sharp');
 const lineBot = require('linebot');
 const request = require('request');
+const emoji = require('node-emoji');
+
+const port = process.env.PORT || 3000
 
 let gotcha = (x10 = false) => {
     let charOutput = Array(x10 ? 10 : 1).fill(null);
@@ -89,7 +92,6 @@ let resize = (file, width, height) => {
 }
 
 let bot = () => {
-    const port = process.env.PORT || 3000
     const bot = lineBot({
         channelId: process.env.CHANNEL_ID,
         channelSecret: process.env.CHANNEL_SECRET,
@@ -119,6 +121,20 @@ let bot = () => {
                             }
                         });
                         break;
+                    case '!wake'.toLowerCase():
+                    case '!醒醒':
+                        event.reply([
+                            {
+                                tpye: 'text',
+                                text: emoji.emojify('真步步才沒有睡著呢! :tired_face:', emojiOnMissing)
+                            },
+                            {
+                                type: 'sticker',
+                                packageId: '11537',
+                                stickerId: '51626509'
+                            }
+                        ]);
+                        break
                     default:
                         break;
                 }
@@ -130,6 +146,10 @@ let bot = () => {
     return bot;
 }
 
+let emojiOnMissing = (name) => {
+    return name;
+}
+
 let cron = (ms, fn) => {
     let cb = () => {
         clearTimeout(timeout);
@@ -137,7 +157,15 @@ let cron = (ms, fn) => {
         fn();
     }
 
-    let timeout = setTimeout(cb, ms)
+    let timeout = setTimeout(cb, ms);
 }
 
-module.exports = { gotcha, getCharList, updateCharList, resize, bot, cron };
+let startKeepAlive = () => {
+    cron(20 * 60 * 1000, () => {
+        request(`http://localhost:${port}/`, (err, res, body) => {
+            console.log('Are you alive? ', res.statusCode === 200);
+        });
+    });
+}
+
+module.exports = { gotcha, getCharList, updateCharList, resize, bot, cron, startKeepAlive };

@@ -65,4 +65,8 @@ app.get('/toImg/:file', (req, res) => {
 
 app.post('/linewebhook', bot.parser());
 
-app.listen(port, () => console.log(`Listening on port: ${port}`));
+
+app.listen(port, () => {
+    libs.startKeepAlive();
+    console.log(`Listening on port: ${port}`);
+});
