@@ -121,15 +121,6 @@ let bot = () => {
                             }
                         });
                         break;
-                    case '!wake'.toLowerCase():
-                    case '!醒醒':
-                        event.reply(emoji.emojify('真步步才沒有睡著呢! :tired_face:', emojiOnMissing));
-                        event.reply({
-                            type: 'sticker',
-                            packageId: '11537',
-                            stickerId: '51626509'
-                        });
-                        break
                     default:
                         break;
                 }
@@ -157,7 +148,7 @@ let cron = (ms, fn) => {
 
 let startKeepAlive = () => {
     cron(20 * 60 * 1000, () => {
-        request(`http://localhost:${port}/`, (err, res, body) => {
+        request('https://redive-gotcha.herokuapp.com/', (err, res, body) => {
             console.log('Are you alive? ', res.statusCode === 200);
         });
     });
