@@ -1,7 +1,6 @@
 const express = require('express');
 const libs = require('./libs');
 const path = require('path');
-const bodyparser = require('body-parser');
 const puppeteer = require('puppeteer');
 
 const app = express();
@@ -9,19 +8,38 @@ const port = process.env.PORT || 3000
 const bot = libs.bot();
 
 app.set('view engine', 'pug');
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 app.use('/static', express.static(path.join(__dirname, '/public')));
 
 app.get('/', (req, res) => {
-    res.render('index', { page: 'index', charList: libs.gotcha(true) });
+    libs.getCharList()
+        .then(rows => {
+            res.render('index', { page: 'index', charList: libs.gotcha(rows, true) });
+        })
+        .catch(err => {
+            res.status(400).send('No data!!');
+        })
 });
 
 app.get('/settings', (req, res) => {
-    res.render('settings', { page: 'settings', charList: libs.getCharList() });
+    libs.getCharList()
+        .then(rows => {
+            res.render('settings', { page: 'settings', charList: rows });
+        })
+        .catch(err => {
+            res.status(400).send('No data!!');
+        });
 });
 
-app.post('/settings', bodyparser.urlencoded({ extended: true }), (req, res) => {
-    libs.updateCharList(req.body);
-    res.redirect(301, '/settings');
+app.post('/settings', (req, res) => {
+    libs.updateCharList(req.body)
+        .then(() => {
+            res.redirect(301, '/settings');
+        })
+        .catch(err => {
+            res.status(400).send('Update Failed!!');
+        });
 });
 
 app.get('/toImg', (req, res) => {

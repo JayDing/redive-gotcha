@@ -1,3 +1,4 @@
+const pg = require('pg');
 const fs = require('fs');
 const sharp = require('sharp');
 const lineBot = require('linebot');
@@ -5,19 +6,110 @@ const request = require('request');
 const emoji = require('node-emoji');
 
 const port = process.env.PORT || 3000
+const pool = new pg.Pool({
+    connectionString: process.env.DATABASE_URL,
+    ssl: true,
+});
 
-let gotcha = (x10 = false) => {
+let getCharList = async () => {
+    const client = await pool.connect();
+    
+    try {
+        const res = await client.query('SELECT * FROM characters ORDER BY star DESC, id ASC');
+        
+        client.release();
+        
+        res.rows
+            .map((char, i, charList) => {
+                char.prob = probCalc(charList, char);
+                return char; 
+            });
+
+        return res.rows.sort((a,b) => b.star - a.star);
+    } catch (err) {
+        client.release();
+        console.error(err.stack);
+    }
+}
+
+let probCalc = (charList, char) => {
+    let cPool = charList.filter((c) => c.inpool === true && c.star === char.star);
+
+    if(cPool.indexOf(char) == -1) return { normal: 0, last: 0 };
+
+    if(char.rateup) return { normal: char.rate, last: char.rate };
+    
+    // star : [ normal, last ]
+    let base = { 1: [80, 0], 2: [18, 98], 3: [2, 2] };
+    let cUpPool = cPool.filter((c) => c.rateup === true);
+    let cUp = cUpPool.reduce((init, char) => init + char.rate , 0);
+
+    return {
+        normal: Math.round((base[char.star][0] - cUp) / (cPool.length - cUpPool.length) * 10000 ) / 10000,
+        last: Math.round((base[char.star][1] - cUp) / (cPool.length - cUpPool.length) * 10000 ) / 10000
+    };
+}
+
+let updateCharList = async (data) => {
+    const client = await pool.connect();
+
+    data.options = data.options
+        .map((option) => {
+            let output = { id: 0, inpool: false, rateup: false, rate: 0};
+
+            if(!Array.isArray(option)) {
+                output.id = option;
+                return output;
+            }
+
+            output.id = option[0];
+            output.inpool = option[1] != undefined;
+            output.rateup = output.inpool && option[2] != undefined;
+            if(output.rateup && option[3] != undefined && !Number.isNaN(option[3])) {
+                output.rateup = option[3] > 0;
+                output.rate = option[3] > 0 ? Number(option[3]) : 0;
+            }
+            
+            return output; 
+        })
+        .sort((a, b) => a.id - b.id);
+
+    try {
+        const res = await client.query('SELECT * FROM characters ORDER BY id ASC');
+        
+        data.options
+            .filter((option, i) => {
+                return option.inpool != res.rows[i].inpool || option.rateup != res.rows[i].rateup || option.rate != res.rows[i].rate;
+            })
+            .forEach(async (option) => {
+                console.log(option);
+
+                try {
+                    await client.query('UPDATE characters SET inpool=$1,rateup=$2,rate=$3 where id=$4', [option.inpool, option.rateup, option.rate, option.id]);
+                } catch (err) {
+                    console.error(err);
+                }
+            });
+
+        client.release();
+    } catch (err) {
+        client.release();
+        console.error(err);
+    }
+}
+
+
+let gotcha = (charList, x10 = false) => {
     let charOutput = Array(x10 ? 10 : 1).fill(null);
     
+    charList = charList.filter((c) => c.inpool === true);
+    
     let getChar = (isLast = false) => {
-        let charList = JSON.parse(fs.readFileSync('character.json'));
         let poolRate = Math.floor(Math.random() * 100) + 1;
-
-        charList = charList.filter((c) => c.inPool === true);
         
         if(poolRate <= 2) {
             listFiltered = charList.filter((c) => c.star === 3);
-            listFiltered.push(...charList.filter((c) => c.star === 3 && c.rateUp));
+            listFiltered.push(...charList.filter((c) => c.star === 3 && c.rateup));
         } else if(poolRate > 2 && poolRate <= (!isLast ? 20 : 100)) {
             listFiltered = charList.filter((c) => c.star === 2);
         } else {
@@ -30,58 +122,6 @@ let gotcha = (x10 = false) => {
     charOutput = charOutput.map((e, i, arr) => getChar(arr.length - 1 === i));
     
     return charOutput;
-}
-
-let getCharList = () => {
-    let charList = JSON.parse(fs.readFileSync('character.json'));
-    charList.map((char, i, charList) => {
-        char.prob = probCalc(charList, char);
-        return char; 
-    });
-    return charList.sort((a, b) => b.star - a.star);
-}
-
-let probCalc = (charList, char) => {
-    let cPool = charList.filter((c) => c.inPool === true && c.star === char.star);
-
-    if(cPool.indexOf(char) == -1) return { normal: 0, last: 0 };
-
-    if(char.rateUp) return { normal: char.rate, last: char.rate };
-    
-    // star : [ normal, last ]
-    let base = { 1: [80, 0], 2: [18, 98], 3: [2, 2] };
-    let cUpPool = cPool.filter((c) => c.rateUp === true);
-    let cUp = cUpPool.reduce((init, char) => init + char.rate , 0);
-
-    return {
-        normal: Math.round((base[char.star][0] - cUp) / (cPool.length - cUpPool.length) * 10000 ) / 10000,
-        last: Math.round((base[char.star][1] - cUp) / (cPool.length - cUpPool.length) * 10000 ) / 10000
-    };
-}
-
-let updateCharList = (data) => {
-    let charList = JSON.parse(fs.readFileSync('character.json'));
-    let output;
-
-    charList.map((char) => {
-        char.inPool = data.inPool && Object.keys(data.inPool).indexOf(char.name) != -1;
-        char.rateUp = char.inPool && data.rateUp && Object.keys(data.rateUp).indexOf(char.name) != -1;
-        if(char.rateUp && data.rate && Object.keys(data.rateUp).indexOf(char.name) != -1 && !Number.isNaN(data.rate[char.name])) {
-            char.rateUp = data.rate[char.name] > 0;
-            char.rate = (data.rate[char.name] > 0) ? Number(data.rate[char.name]) : 0;
-        }
-
-        return char;
-    });
-
-    output = JSON.stringify(charList);
-    
-    try {
-        fs.writeFileSync('character.json', output);
-        console.log('character.json is updated');
-    } catch(err) {
-        console.error('character.json updated Error: ' + err);
-    }
 }
 
 let resize = (file, width, height) => {
@@ -154,4 +194,4 @@ let startKeepAlive = () => {
     });
 }
 
-module.exports = { gotcha, getCharList, updateCharList, resize, bot, cron, startKeepAlive };
+module.exports = { gotcha, getCharList, updateCharList, resize, bot, cron, startKeepAlive};
