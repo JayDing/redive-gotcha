@@ -8,8 +8,6 @@ const port = process.env.PORT || 3000
 const bot = libs.bot();
 
 app.set('view engine', 'pug');
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
 app.use('/static', express.static(path.join(__dirname, '/public')));
 
 app.get('/', (req, res) => {
@@ -32,7 +30,7 @@ app.get('/settings', (req, res) => {
         });
 });
 
-app.post('/settings', (req, res) => {
+app.post('/settings', express.urlencoded({ extended: true }), (req, res) => {
     libs.updateCharList(req.body)
         .then(() => {
             res.redirect(301, '/settings');
