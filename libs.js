@@ -53,21 +53,18 @@ let probCalc = (charList, char) => {
 let updateCharList = async (data) => {
     const client = await pool.connect();
 
-    data.options = data.options
+    data = Object.values(data)
         .map((option) => {
-            let output = { id: 0, inpool: false, rateup: false, rate: 0};
+            let output = {
+                id: Number(option.id),
+                inpool: option.inpool != undefined,
+                rateup: option.inpool != undefined && option.rateup != undefined,
+                rate: 0
+            };
 
-            if(!Array.isArray(option)) {
-                output.id = option;
-                return output;
-            }
-
-            output.id = option[0];
-            output.inpool = option[1] != undefined;
-            output.rateup = output.inpool && option[2] != undefined;
-            if(output.rateup && option[3] != undefined && !Number.isNaN(option[3])) {
-                output.rateup = option[3] > 0;
-                output.rate = option[3] > 0 ? Number(option[3]) : 0;
+            if(output.rateup && option.rate != undefined && !Number.isNaN(option.rate)) {
+                output.rateup = option.rate > 0;
+                output.rate = option.rate > 0 ? Number(option.rate) : 0;
             }
             
             return output; 
@@ -77,7 +74,7 @@ let updateCharList = async (data) => {
     try {
         const res = await client.query('SELECT * FROM characters ORDER BY id ASC');
         
-        data.options
+        data
             .filter((option, i) => {
                 return option.inpool != res.rows[i].inpool || option.rateup != res.rows[i].rateup || option.rate != res.rows[i].rate;
             })

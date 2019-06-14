@@ -70,10 +70,6 @@ div.char > div.frame.rainbow {
     background: linear-gradient(to bottom right, orange , yellow, green, cyan, blue, violet);
 }
 
-div.char > div.frame.grayscale {
-    filter: grayscale(100%);
-}
-
 div.char > div.frame > img {
     height: 104px;
     width: 104px;
@@ -115,4 +111,12 @@ input.update {
 input.reset {
     right: 20px;
     top: 60px;
+}
+
+.grayscale {
+    filter: grayscale(100%);
+}
+
+.hidden {
+    display: none;
 }

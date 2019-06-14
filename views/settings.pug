@@ -10,27 +10,27 @@ html
                 each char, i in charList
                     -var frameClass = { 1: "blue", 2: "gold", 3:"rainbow" }
                     -var imgGrayScale = char.inpool ? "" : "grayscale"
+                    -var rateVisible = char.rateup ? "" : "hidden"
                             
                     .char
                         .frame(class=frameClass[char.star] class=imgGrayScale)
                             img(src=`/static/images/card/${char.name}.png`)
                         .name
                             strong !{ char.name.replace("（", "<br/>（") }
-                            input.key(type="hidden" name=`options[${i}]` value=char.id)
+                            input.key(type="hidden" name=`option${i}[id]` value=char.id)
                         .info
                             span 機率 !{ char.prob.normal } %
                             span (第10抽 !{ char.prob.last} %)
                         .footer
                             label.in-pool
-                                input(type="checkbox" name=`options[${i}]` checked=char.inpool)
+                                input(type="checkbox" name=`option${i}[inpool]` checked=char.inpool)
                                 | 卡池啟用
                             label.rate-up
-                                input(type="checkbox" name=`options[${i}]` checked=char.rateup)
+                                input(type="checkbox" name=`option${i}[rateup]` checked=char.rateup)
                                 | 機率提升
-                            if char.rateup
-                                label.rate
-                                    input(type="text" name=`options[${i}]` value=char.rate)
-                                    | %
+                            label.rate(class=rateVisible)
+                                input(type="text" name=`option${i}[rate]` value=char.rate)
+                                | %
                 input.update(type="submit", value="更新")
                 input.reset(type="button" value="重設")
 
