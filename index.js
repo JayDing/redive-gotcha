@@ -3,12 +3,16 @@ const libs = require('./libs');
 const path = require('path');
 const puppeteer = require('puppeteer');
 
+const apiRouter = require('./routers/api');
+
 const app = express();
-const port = process.env.PORT || 3000
 const bot = libs.bot();
+const port = process.env.PORT || 3000
 
 app.set('view engine', 'pug');
-app.use('/static', express.static(path.join(__dirname, '/public')));
+app.use('/static', express.static(path.join(__dirname, 'public')));
+
+app.use('/api', apiRouter);
 
 app.get('/', (req, res) => {
     libs.getCharList()

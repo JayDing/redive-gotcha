@@ -4,16 +4,7 @@ body {
     padding: 0;
 }
 
-div#main {
-    display: flex;
-    align-items: center;
-    height: 100%;
-    justify-content: center;
-    position: relative;
-    text-align: center;
-    width: 100%;
-}
-div#main::before {
+body::before {
     bottom: 0;
     content: '';
     background: url('/static/images/sticker.png') 25% 25%;
@@ -25,6 +16,16 @@ div#main::before {
     right: 0;
     top: 0;
     z-index: -1;
+}
+
+div#main {
+    display: flex;
+    align-items: center;
+    height: 100%;
+    justify-content: center;
+    position: relative;
+    text-align: center;
+    width: 100%;
 }
 
 form#board {
