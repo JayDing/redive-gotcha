@@ -186,7 +186,11 @@ let cron = (ms, fn) => {
 let startKeepAlive = () => {
     cron(20 * 60 * 1000, () => {
         request('https://redive-gotcha.herokuapp.com/', (err, res, body) => {
-            console.log('Are you alive? ', res.statusCode === 200);
+            if(err) {
+                console.error(err);
+            } else {
+                console.log('Are you alive? ', res.statusCode === 200);
+            }
         });
     });
 }
