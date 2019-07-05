@@ -1,3 +1,14 @@
+const fs = require('fs');
+const path = require('path');
+const sharp = require('sharp');
+const puppeteer = require('puppeteer');
+const lineBot = require('linebot');
+const request = require('request');
+
+// star : [ normal, last ]
+const base = { 1: [80, 0], 2: [18, 98], 3: [2, 2] };
+const port = process.env.PORT || 3000
+
 const charModel = require('../models').characters;
 
 module.exports = {
@@ -5,12 +16,10 @@ module.exports = {
 		const probCalc = (charList, char) => {
 			let cPool = charList.filter((c) => c.inpool === true && c.star === char.star);
 		
-			if(cPool.indexOf(char) == -1) return { normal: 0, last: 0 };
+			if(cPool.indexOf(char) === -1) return { normal: 0, last: 0 };
 		
 			if(char.rateup) return { normal: char.rate, last: char.rate };
 			
-			// star : [ normal, last ]
-			let base = { 1: [80, 0], 2: [18, 98], 3: [2, 2] };
 			let cUpPool = cPool.filter((c) => c.rateup === true);
 			let cUp = cUpPool.reduce((init, char) => init + char.rate , 0);
 		
@@ -37,10 +46,11 @@ module.exports = {
 			let getChar = (isLast = false) => {
 				let poolRate = Math.floor(Math.random() * 100) + 1;
 				
-				if(poolRate <= 2) {
+				isLast = isLast ? 1 : 0
+				if(poolRate <= base[3][isLast]) {
 					listFiltered = charList.filter((c) => c.star === 3);
 					listFiltered.push(...charList.filter((c) => c.star === 3 && c.rateup));
-				} else if(poolRate > 2 && poolRate <= (!isLast ? 20 : 100)) {
+				} else if(poolRate > base[3][isLast] && poolRate <= (base[3][isLast] + base[2][isLast])) {
 					listFiltered = charList.filter((c) => c.star === 2);
 				} else {
 					listFiltered = charList.filter((c) => c.star === 1);
@@ -99,11 +109,102 @@ module.exports = {
 					values: [field.inpool, field.rateup, field.rate, field.id]
 				});
 
-				if(i == (arr.length - 1)) {
+				if(arr.length - 1 === i) {
 					res.locals.queryResult = true;
 
 					next();
 				}
 			});
+	},
+	toImg: async (req, res) => {
+		let timestamp = new Date().toISOString().split(/\./)[0].replace(/[-:T]/g, '');
+		let imageName = `result_${timestamp}.jpg`;
+		let imagePath = path.resolve(__dirname, '../public/images/', imageName);
+		
+		let resize = (file, width, height) => {
+			let inStream = fs.createReadStream(file);
+			let outStream = fs.createWriteStream(file.replace('result_', 'thumb_'), { flags: 'w' });
+			
+			inStream.pipe(sharp().resize(width, height)).pipe(outStream);
+		}
+	
+		try {
+			const browser = await puppeteer.launch({
+				'args' : [
+					'--no-sandbox',
+					'--disable-setuid-sandbox'
+				]
+			});
+	
+			const page = await browser.newPage();
+	
+			await page.goto(`http://localhost:${port}/`);
+			await page.waitForSelector('#main');
+			await page.setViewport({
+				width: 890,
+				height: 455
+			});
+			await page.screenshot({
+				path: imagePath,
+				type: 'jpeg'
+			})            
+			await browser.close();
+	
+			resize(imagePath, 240, 123);
+			res.status(200).send(timestamp);
+		} catch (err) {
+			console.error(err);
+		}
+	},
+	getImg: (req, res) => {
+		let filePath = path.resolve(__dirname, '../public/images/', req.params.file);
+		
+		if(fs.existsSync(filePath)) {
+			let readStream = fs.createReadStream(filePath);
+	
+			readStream.pipe(res);
+		} else {
+			res.status(400).send('No Images!!');
+		}
+	},
+	bot: () => {
+		const bot = lineBot({
+			channelId: process.env.CHANNEL_ID,
+			channelSecret: process.env.CHANNEL_SECRET,
+			channelAccessToken: process.env.CHANNEL_ACCESS_TOKEN
+		});
+		
+		bot.on('message', (event) => {
+			switch(event.message.type) {
+				case 'text':
+					switch (event.message.text) {
+						case '!抽':
+							request(`http://localhost:${port}/toImg`, (err, res, body) => {
+								if(!err && res.statusCode == 200) {
+									event.reply({
+										type: 'image',
+										originalContentUrl: `https://redive-gotcha.herokuapp.com/toImg/result_${body}.jpg`,
+										previewImageUrl: `https://redive-gotcha.herokuapp.com/toImg/thumb_${body}.jpg`
+									})
+									.then(() => {
+										console.log(`Reply "${event.message.text}" successfully`);
+									})
+									.catch((err) => {
+										console.error('Error: ' + err);
+									});
+								} else {
+									console.error('Oops! Something wrong!')
+								}
+							});
+							break;
+						default:
+							break;
+					}
+				default:
+					break;
+			}
+		});
+
+		return bot.parser();
 	}
 };

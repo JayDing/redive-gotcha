@@ -1,3 +1,5 @@
+const request = require('request');
+
 let cron = (ms, fn) => {
     let cb = () => {
         clearTimeout(timeout);

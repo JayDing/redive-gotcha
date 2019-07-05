@@ -17,5 +17,5 @@ app.use('/api', apiRouter);
 
 app.listen(port, () => {
     libs.startKeepAlive();
-    console.log(`Listening on port: ${port}`);
+    console.log(`Listening on: http://localhost:${port}`);
 });
