@@ -1,5 +1,6 @@
 const express = require('express');
 const path = require('path');
+const cors = require('cors');
 
 const app = express();
 const port = process.env.PORT || 3000
@@ -11,6 +12,7 @@ const apiRouter = require('./routers/api');
 
 app.set('view engine', 'pug');
 app.use('/static', express.static(path.join(__dirname, 'public')));
+app.use(cors());
 
 app.use('/', indexRouter);
 app.use('/api', apiRouter);
