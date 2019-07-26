@@ -7,7 +7,7 @@ const request = require('request');
 
 // STAR : [ normal, last ]
 const base = { 1: [80, 0], 2: [18, 98], 3: [2, 2] };
-const port = process.env.PORT || 3000;
+const url = process.env.DOMAIN;
 
 const charModel = require('../models').characters;
 
@@ -23,10 +23,12 @@ module.exports = {
 
             let cUpPool = cPool.filter((c) => c.rateup === true);
             let cUp = cUpPool.reduce((init, char) => init + char.rate , 0);
+            let normalRate = base[char.star][0] - cUp; 
+            let lastRate = base[char.star][1] - cUp; 
 
             return {
-                normal: Math.round((base[char.star][0] - cUp) / (cPool.length - cUpPool.length) * 10000 ) / 10000,
-                last: Math.round((base[char.star][1] - cUp) / (cPool.length - cUpPool.length) * 10000 ) / 10000
+                normal: normalRate > 0 ? Math.round((normalRate) / (cPool.length - cUpPool.length) * 10000 ) / 10000 : 0,
+                last: lastRate > 0 ? Math.round((lastRate) / (cPool.length - cUpPool.length) * 10000 ) / 10000 : 0
             };
         };
 
@@ -135,7 +137,7 @@ module.exports = {
 
             const page = await browser.newPage();
 
-            await page.goto(`http://localhost:${port}/gotcha`);
+            await page.goto(`${url}/gotcha`);
             await page.waitForSelector('#main');
             await page.setViewport({
                 width: 890,
@@ -148,7 +150,7 @@ module.exports = {
             await browser.close();
 
             resize(filePath, thumbPath, 240, 123);
-            res.status(200).json({ file: fileName, thumb: thumbName });
+            res.status(200).json({ normal: fileName, thumb: thumbName });
         } catch (err) {
             console.error(err);
         }
@@ -171,12 +173,13 @@ module.exports = {
             channelAccessToken: process.env.CHANNEL_ACCESS_TOKEN
         });
         const imgRequset = (event, type) => {
-            request(`http://localhost:${port}/toImg/${type}`, (err, res, body) => {
+            request(`${url}/toImg/${type}`, (err, res, body) => {
                 if(!err && res.statusCode == 200) {
+                    const file = JSON.parse(body);
                     event.reply({
                         type: 'image',
-                        originalContentUrl: `https://redive-gotcha.herokuapr.com/getImg/${body.file}.jpg`,
-                        previewImageUrl: `https://redive-gotcha.herokuapr.com/getImg/${body.thumb}.jpg`
+                        originalContentUrl: `${url}/getImg/${file.normal}`,
+                        previewImageUrl: `${url}/getImg/${file.thumb}`
                     })
                     .then(() => {
                         console.log(`Reply "${event.message.text}" successfully`);

@@ -1,11 +1,13 @@
 const express = require('express');
 const path = require('path');
 const cors = require('cors');
+const dotenv = require('dotenv');
+
+dotenv.config();
 
 const app = express();
 const port = process.env.PORT || 3000
 
-const libs = require('./libs');
 const indexRouter = require('./routers/index');
 const apiRouter = require('./routers/api');
 
@@ -18,6 +20,5 @@ app.use('/', indexRouter);
 app.use('/api', apiRouter);
 
 app.listen(port, () => {
-    libs.startKeepAlive();
     console.log(`Listening on: http://localhost:${port}`);
 });
