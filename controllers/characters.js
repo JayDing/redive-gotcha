@@ -7,7 +7,7 @@ const request = require('request');
 
 // STAR : [ normal, last ]
 const base = { 1: [80, 0], 2: [18, 98], 3: [2, 2] };
-const port = process.env.PORT || 3000
+const port = process.env.PORT || 3000;
 
 const charModel = require('../models').characters;
 
@@ -170,29 +170,32 @@ module.exports = {
             channelSecret: process.env.CHANNEL_SECRET,
             channelAccessToken: process.env.CHANNEL_ACCESS_TOKEN
         });
+        const imgRequset = (event, type) => {
+            request(`http://localhost:${port}/toImg/${type}`, (err, res, body) => {
+                if(!err && res.statusCode == 200) {
+                    event.reply({
+                        type: 'image',
+                        originalContentUrl: `https://redive-gotcha.herokuapr.com/getImg/${body.file}.jpg`,
+                        previewImageUrl: `https://redive-gotcha.herokuapr.com/getImg/${body.thumb}.jpg`
+                    })
+                    .then(() => {
+                        console.log(`Reply "${event.message.text}" successfully`);
+                    })
+                    .catch((err) => {
+                        console.error('Error: ' + err);
+                    });
+                } else {
+                    console.error('Oops! Something wrong!')
+                }
+            });
+        }
 
         bot.on('message', (event) => {
             switch(event.message.type) {
                 case 'text':
                     switch (event.message.text) {
-                        case '!æŠ½':
-                            request(`http://localhost:${port}/toImg`, (err, res, body) => {
-                                if(!err && res.statusCode == 200) {
-                                    event.reply({
-                                        type: 'image',
-                                        originalContentUrl: `https://redive-gotcha.herokuapr.com/getImg/${body.file}.jpg`,
-                                        previewImageUrl: `https://redive-gotcha.herokuapr.com/getImg/${body.thumb}.jpg`
-                                    })
-                                    .then(() => {
-                                        console.log(`Reply "${event.message.text}" successfully`);
-                                    })
-                                    .catch((err) => {
-                                        console.error('Error: ' + err);
-                                    });
-                                } else {
-                                    console.error('Oops! Something wrong!')
-                                }
-                            });
+                        case '!抽':
+                            imgRequset(event, 'featured');
                             break;
                         default:
                             break;
