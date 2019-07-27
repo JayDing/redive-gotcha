@@ -52,7 +52,7 @@ module.exports = {
         }
     },
     gotcha: async (req, res, next) => {
-        // const type = req.params.type;
+        const type = req.params.type;
         const gotcha = (charList, x10 = false) => {
             let charOutput = Array(x10 ? 10 : 1).fill(null);
             let getChar = (isLast = false) => {
@@ -188,7 +188,8 @@ module.exports = {
                         console.error('Error: ' + err);
                     });
                 } else {
-                    console.error('Oops! Something wrong!')
+                    console.error('Oops! Something wrong!');
+                    console.error(err);
                 }
             });
         }
@@ -196,9 +197,16 @@ module.exports = {
         bot.on('message', (event) => {
             switch(event.message.type) {
                 case 'text':
-                    switch (event.message.text) {
-                        case '!抽':
+                    switch (event.message.text.toLowerCase()) {
+                        case '!抽白金':
+                        case '!dn':
+                            imgRequset(event, 'normal');
+                        case '!抽精選':
+                        case '!df':
                             imgRequset(event, 'featured');
+                        case '!抽必中':
+                        case '!dm':
+                            imgRequset(event, 'must3Star');
                             break;
                         default:
                             break;
