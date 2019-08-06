@@ -5,8 +5,6 @@ const puppeteer = require('puppeteer');
 const lineBot = require('linebot');
 const request = require('request');
 
-// STAR : [ normal, last ]
-const base = { 1: [80, 0], 2: [18, 98], 3: [2, 2] };
 const url = process.env.DOMAIN;
 
 const charModel = require('../models').characters;
@@ -14,75 +12,11 @@ const charModel = require('../models').characters;
 module.exports = {
     list: async (req, res, next) => {
         const type = req.params.type;
-        const probCalc = (charList, char) => {
-            let cPool = charList.filter((c) => c.inpool === true && c.star === char.star);
-
-            if(cPool.indexOf(char) === -1) return { normal: 0, last: 0 };
-
-            if(char.rateup) return { normal: char.rate, last: char.rate };
-
-            let cUpPool = cPool.filter((c) => c.rateup === true);
-            let cUp = cUpPool.reduce((init, char) => init + char.rate , 0);
-            let normalRate = base[char.star][0] - cUp; 
-            let lastRate = base[char.star][1] - cUp; 
-
-            return {
-                normal: normalRate > 0 ? Math.round((normalRate) / (cPool.length - cUpPool.length) * 10000 ) / 10000 : 0,
-                last: lastRate > 0 ? Math.round((lastRate) / (cPool.length - cUpPool.length) * 10000 ) / 10000 : 0
-            };
-        };
 
         try {
-            let { rows } = await charModel.query({
-                text: 'SELECT c.id id, c.name, c.star, r.inpool, r.rateup, r.rate, r.id rate_id, r.pool_type FROM characters c JOIN rate r ON c.id = r.char_id WHERE r.pool_type=$1 ORDER BY c.star DESC, name DESC',
-                values: [type]
-            });
-
-            rows.map((char, i, charList) => {
-                char.prob = probCalc(charList, char);
-                return char; 
-            });
+            let rows = await charModel.getByPool(type);
 
             res.locals.rows = rows;
-
-            next();
-        } catch (err) {
-            console.error(err.stack);
-            next();
-        }
-    },
-    gotcha: async (req, res, next) => {
-        const type = req.params.type;
-        const gotcha = (charList, x10 = false) => {
-            let charOutput = Array(x10 ? 10 : 1).fill(null);
-            let getChar = (isLast = false) => {
-                let poolRate = Math.floor(Math.random() * 100) + 1;
-
-                isLast = isLast ? 1 : 0
-                if(poolRate <= base[3][isLast]) {
-                    listFiltered = charList.filter((c) => c.star === 3);
-                    listFiltered.push(...charList.filter((c) => c.star === 3 && c.rateup));
-                } else if(poolRate > base[3][isLast] && poolRate <= (base[3][isLast] + base[2][isLast])) {
-                    listFiltered = charList.filter((c) => c.star === 2);
-                } else {
-                    listFiltered = charList.filter((c) => c.star === 1);
-                }
-
-                return listFiltered[Math.floor(Math.random() * listFiltered.length)];
-            }
-
-            charOutput = charOutput.map((e, i, arr) => getChar(arr.length - 1 === i));
-            
-            return charOutput;
-        }
-
-        try {
-            let { rows } = await charModel.query({
-                text: 'SELECT c.id id, c.name, c.star, r.inpool, r.rateup, r.rate, r.id rate_id, r.pool_type FROM characters c JOIN rate r ON c.id = r.char_id WHERE r.pool_type=$1 AND r.inpool=$2 ORDER BY c.star DESC, name DESC',
-                values: ['featured', true]
-            });
-
-            res.locals.rows = gotcha(rows, true);
 
             next();
         } catch (err) {
@@ -97,8 +31,7 @@ module.exports = {
             data
                 .forEach(async (field, i, arr) => {
                     await charModel.query({
-                        text: 'UPDATE rate SET inpool=$1,rateup=$2,rate=$3 WHERE id=$4',
-                        values: [field.inpool, field.rateup, field.rate, field.rate_id]
+                        values: [field.inpool, field.rateup, field.prob_normal, field.prob_last, field.rate_id]
                     });
 
                     if(arr.length - 1 === i) {
@@ -109,6 +42,39 @@ module.exports = {
         } catch (err) {
             console.error(err);
             res.locals.queryResult = false;
+            next();
+        }
+    },
+    gotcha: async (req, res, next) => {
+        const type = req.params.type;
+        const gotcha = (charList, x10 = false) => {
+            let charOutput = Array(x10 ? 10 : 1).fill(null);
+            let getChar = (isLast) => {
+                let rnd = Math.random() * 100;
+                let total = 0;
+
+                for(let char of charList) {
+                    let prob = isLast ? char.prob_last : char.prob_normal;
+
+                    total += prob;
+                    if(rnd <= total) {
+                        return char;
+                    }
+                }
+            }
+
+            charOutput = charOutput.map((e, i, arr) => getChar(arr.length - 1 === i));
+            
+            return charOutput;
+        }
+
+        try {
+            let rows = await charModel.getByPool(type, true);
+            res.locals.rows = gotcha(rows, true);
+
+            next();
+        } catch (err) {
+            console.error(err.stack);
             next();
         }
     },
