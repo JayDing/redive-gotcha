@@ -6,7 +6,7 @@ const router = express.Router();
 
 const charController = require('../controllers').characters;
 
-router.get('/gotcha', charController.gotcha, (req, res) => {
+router.get('/gotcha/:type', charController.gotcha, (req, res) => {
     if(res.locals.rows) {
         res.render('index', { page: 'index', charList: res.locals.rows });
     } else {

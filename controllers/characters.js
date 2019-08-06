@@ -14,34 +14,9 @@ const charModel = require('../models').characters;
 module.exports = {
     list: async (req, res, next) => {
         const type = req.params.type;
-        const probCalc = (charList, char) => {
-            let cPool = charList.filter((c) => c.inpool === true && c.star === char.star);
-
-            if(cPool.indexOf(char) === -1) return { normal: 0, last: 0 };
-
-            if(char.rateup) return { normal: char.rate, last: char.rate };
-
-            let cUpPool = cPool.filter((c) => c.rateup === true);
-            let cUp = cUpPool.reduce((init, char) => init + char.rate , 0);
-            let normalRate = base[char.star][0] - cUp; 
-            let lastRate = base[char.star][1] - cUp; 
-
-            return {
-                normal: normalRate > 0 ? Math.round((normalRate) / (cPool.length - cUpPool.length) * 10000 ) / 10000 : 0,
-                last: lastRate > 0 ? Math.round((lastRate) / (cPool.length - cUpPool.length) * 10000 ) / 10000 : 0
-            };
-        };
 
         try {
-            let { rows } = await charModel.query({
-                text: 'SELECT c.id id, c.name, c.star, r.inpool, r.rateup, r.rate, r.id rate_id, r.pool_type FROM characters c JOIN rate r ON c.id = r.char_id WHERE r.pool_type=$1 ORDER BY c.star DESC, name DESC',
-                values: [type]
-            });
-
-            rows.map((char, i, charList) => {
-                char.prob = probCalc(charList, char);
-                return char; 
-            });
+            let rows = await charModel.getByPool(type);
 
             res.locals.rows = rows;
 
@@ -77,11 +52,7 @@ module.exports = {
         }
 
         try {
-            let { rows } = await charModel.query({
-                text: 'SELECT c.id id, c.name, c.star, r.inpool, r.rateup, r.rate, r.id rate_id, r.pool_type FROM characters c JOIN rate r ON c.id = r.char_id WHERE r.pool_type=$1 AND r.inpool=$2 ORDER BY c.star DESC, name DESC',
-                values: ['featured', true]
-            });
-
+            let rows = await charModel.getByPool(type, true);
             res.locals.rows = gotcha(rows, true);
 
             next();
@@ -97,8 +68,8 @@ module.exports = {
             data
                 .forEach(async (field, i, arr) => {
                     await charModel.query({
-                        text: 'UPDATE rate SET inpool=$1,rateup=$2,rate=$3 WHERE id=$4',
-                        values: [field.inpool, field.rateup, field.rate, field.rate_id]
+                        text: 'UPDATE "charInfo" SET inpool=$1,rateup=$2,prob_normal=$3,prob_last=$4 WHERE id=$5',
+                        values: [field.inpool, field.rateup, field.prob_normal, field.prob_last, field.rate_id]
                     });
 
                     if(arr.length - 1 === i) {

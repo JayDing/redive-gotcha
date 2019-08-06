@@ -1,4 +1,7 @@
 node_modules/
 public/dist/
+public/images/featured*
+public/images/must3Star*
+public/images/normal*
 .env
 test.js
