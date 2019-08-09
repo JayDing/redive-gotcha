@@ -53,7 +53,11 @@ module.exports = {
                 let rnd = Math.random() * 100;
                 let total = 0;
 
-                for(let char of charList.filter(char => char.inpool)) {
+                charList = charList
+                    .filter(char => char.inpool)
+                    .sort(() => (Math.random() > 0.5) ? 1 : -1);
+
+                for(let char of charList) {
                     let prob = isLast ? char.prob_last : char.prob_normal;
 
                     total += prob;
@@ -61,6 +65,7 @@ module.exports = {
                         return char;
                     }
                 }
+                return charList[charList.length - 1];
             }
 
             charOutput = charOutput.map((e, i, arr) => getChar(arr.length - 1 === i));
