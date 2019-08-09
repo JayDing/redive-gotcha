@@ -5,7 +5,7 @@ const puppeteer = require('puppeteer');
 const lineBot = require('linebot');
 const request = require('request');
 
-const url = process.env.DOMAIN;
+const port = process.env.PORT || 3000;
 
 const charModel = require('../models').characters;
 
@@ -106,8 +106,8 @@ module.exports = {
             });
 
             const page = await browser.newPage();
-
-            await page.goto(`${url}/gotcha`);
+            
+            await page.goto(`http://localhost:${port}/gotcha/${type}`);
             await page.waitForSelector('#main');
             await page.setViewport({
                 width: 890,
@@ -143,13 +143,13 @@ module.exports = {
             channelAccessToken: process.env.CHANNEL_ACCESS_TOKEN
         });
         const imgRequset = (event, type) => {
-            request(`${url}/toImg/${type}`, (err, res, body) => {
+            request(`http://localhost:${port}/toImg/${type}`, (err, res, body) => {
                 if(!err && res.statusCode == 200) {
                     const file = JSON.parse(body);
                     event.reply({
                         type: 'image',
-                        originalContentUrl: `${url}/getImg/${file.normal}`,
-                        previewImageUrl: `${url}/getImg/${file.thumb}`
+                        originalContentUrl: `https://redive-gotcha.herokuapp.com/getImg/${file.normal}`,
+                        previewImageUrl: `https://redive-gotcha.herokuapp.com/getImg/${file.thumb}`
                     })
                     .then(() => {
                         console.log(`Reply "${event.message.text}" successfully`);
