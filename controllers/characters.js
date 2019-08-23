@@ -50,17 +50,16 @@ module.exports = {
         const gotcha = (charList, x10 = false) => {
             let charOutput = Array(x10 ? 10 : 1).fill(null);
             let getChar = (isLast) => {
-                let rnd = Math.random() * 100;
+                let rnd = Math.random() * 1000;
                 let total = 0;
 
                 charList = charList
                     .filter(char => char.inpool)
                     .sort(() => (Math.random() > 0.5) ? 1 : -1);
-
                 for(let char of charList) {
                     let prob = isLast ? char.prob_last : char.prob_normal;
-
-                    total += prob;
+                    
+                    total += prob * 10;
                     if(rnd <= total) {
                         return char;
                     }
