@@ -30,7 +30,7 @@ module.exports = {
         try {
             data
                 .forEach(async (field, i, arr) => {
-                    await charModel.query({
+                    await charModel.update({
                         values: [field.inpool, field.rateup, field.prob_normal, field.prob_last, field.rate_id]
                     });
 

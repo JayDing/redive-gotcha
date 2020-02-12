@@ -52,21 +52,5 @@ module.exports = (db) => {
         }
     };
 
-    characters.query = async (params) => {
-        const client = await db.connect();
-
-        let { text, values } = params;
-        try {
-            const res = await client.query(text, values);
-
-            client.release();
-
-            return res;
-        } catch (err) {
-            console.error(err.stack);
-            client.release();
-        }
-    };
-
     return characters;
 };
