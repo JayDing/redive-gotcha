@@ -18,7 +18,7 @@
     "linebot": "^1.5.3",
     "node-emoji": "^1.10.0",
     "pg": "^7.18.1",
-    "pug": "^2.0.4",
+    "pug": "^3.0.1",
     "puppeteer": "^1.20.0",
     "request": "^2.88.2",
     "sequelize-cli": "^5.5.1",
